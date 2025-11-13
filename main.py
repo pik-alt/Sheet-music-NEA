@@ -5,13 +5,16 @@ window.geometry("1000x500")
 window.resizable (True,True)
 window.config(background="blue")
 
-
+#Setting up the two main frames for the UI, one for the top bar (optionsFrame) and one for the main stave (staveFrame)
 optionsFrame = Frame(window)
 optionsFrame.grid(row = 0, column = 0, padx = 50, pady = 30, columnspan = 2)
 
 staveFrame = Frame(window)
 staveFrame.grid(row = 1, column = 0, padx = 50, pady = 30, columnspan = 2)
 
+
+#Creates the two canvasas to be able to import images onto them
+#Currently very different colours just so I can see what I'm doing
 optionsCanvas = Canvas(optionsFrame, width = 930, height = 100)
 optionsCanvas.config(bg="green")
 optionsCanvas.pack()
@@ -24,10 +27,12 @@ staveCanvas.config(bg="red")
 quarter = PhotoImage(file="quarter2.png")
 
 
-#draw stave lines and the lines on either end
+#draw stave lines
 for i in range(0, 5):
     staveCanvas.create_line(20, 30 + (30 * i), 880, 30 + (30 * i), width = 3)
     staveCanvas.pack()
+    
+#Draws the one vertical line at the beginning and the two at the end
 staveCanvas.create_line(20, 29, 20, 152, width = 3)
 staveCanvas.create_line(880, 29, 880, 152, width = 3)
 staveCanvas.create_line(870, 29, 870, 152, width = 3)
