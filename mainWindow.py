@@ -1,5 +1,6 @@
 from tkinter import *
 import time
+import TAOAT
 
 class MainWindow:
 
@@ -11,7 +12,8 @@ class MainWindow:
         self.window.resizable (True,True)
         self.window.config(background="blue")
 
-        
+        if TAOAT.is_six(6):
+            print(6)
 
         #Setting up the two main frames for the UI, one for the top bar (optionsFrame) and one for the main stave (staveFrame)
         optionsFrame = Frame(self.window)
