@@ -9,7 +9,7 @@ class MainWindow:
         self.window = Tk()
         self.window.title("Test")
         self.window.geometry("1000x500")
-        self.window.resizable (True,True)
+        self.window.resizable (False,False)
         self.window.config(background="blue")
 
         if TAOAT.is_six(6):
@@ -33,14 +33,21 @@ class MainWindow:
         self.staveCanvas.config(bg="red")
 
 
-        #loads in images of all the notes
-        quarter = PhotoImage(file="quarter2.png")
-        half = PhotoImage(file="half.png")
+        #List of clefs for the dropdown box
+        listClef = ["Treble","Bass"]
 
+        #loads in images of all the notes
+        quarter = PhotoImage(file="images/quarter.png")
+        half = PhotoImage(file="images/half.png")
+        eighth = PhotoImage(file="images/eighth.png")
+        full = PhotoImage(file="images/full.png")
+        rest = PhotoImage(file="images/rest.png")
 
         #initialises the variable 'currentNote' and has it be set to the default of a quarter note
         self.currentNote = quarter
 
+        #initialises the variable 'currentClef' and sets it to the default of treble
+        currentClef = StringVar(value="Treble")
 
         #draw stave lines
         for i in range(0, 5):
@@ -54,15 +61,32 @@ class MainWindow:
 
 
         #Create buttons for the top options bar
+        #Uses the lambda function because it doesn't work if we just call changeNote(quarter) for instance
         buttonQuarter = Button(optionsCanvas, image=quarter, command=lambda n=quarter: self.changeNote(n))
         buttonQuarter.grid(column=0, row = 0, padx = 5, pady = 5)
-
 
         buttonHalf = Button(optionsCanvas, image=half, command=lambda n=half: self.changeNote(n))
         buttonHalf.grid(column = 1, row = 0 , padx = 5, pady = 5)
 
+        buttonEighth = Button(optionsCanvas, image=eighth, command=lambda n=eighth: self.changeNote(n))
+        buttonEighth.grid(column = 3, row = 0, padx = 5, pady = 5)
+
+        buttonFull = Button(optionsCanvas, image=full, command=lambda n=full: self.changeNote(n))
+        buttonFull.grid(column = 4, row = 0, padx = 5, pady = 5)
+
+        buttonRest = Button(optionsCanvas, image=rest, command=lambda n=rest: self.changeNote(n))
+        buttonRest.grid(column = 5, row = 0, padx = 5, pady = 5)
+
+
+        #Creates the clef selection drop down menu
+        clefDropDown = OptionMenu(optionsCanvas, currentClef, *listClef)
+        clefDropDown.grid(column = 6, row = 0, padx = 20, pady = 5, sticky=E)
+
+
         #binds left mouse click to execute the 'leftClickEvent' function
         self.staveCanvas.bind('<1>', self.leftClickEvent)
+
+        self.staveCanvas.bind('<3>', self.rightClickEvent)
 
 
     #Takes n as the name of the note to change
@@ -78,8 +102,14 @@ class MainWindow:
     #x position is the mouses x position, y position is the output from closest stave to snap it
     def leftClickEvent(self,event):
         self.staveCanvas.create_image((event.x),self.closestStave(event)-25,image=self.currentNote)
-        print(self.currentNote)
         print(event.y)
+
+    
+    def rightClickEvent(self,event):
+        overlapping = self.staveCanvas.find_overlapping(event.x, event.y, event.x + 1, event.y + 1)
+        for item in overlapping:
+            if item > 8: #8 is the last ID of the stave, any object after 8 is user placed
+                self.staveCanvas.delete(item)
 
 
     #Function name: closestStave
@@ -89,10 +119,11 @@ class MainWindow:
         mouseY=(event.y)
 
         #checks if the mouse is above or below the stave
-        if mouseY > 150:
-            return 150
-        elif mouseY < 30:
-            return 30
+        if mouseY >= 160:
+            return 160
+            
+        elif mouseY <= 20:
+            return 21
         
         #cycles through the stave lines to check which ones it's inbetween, topMiddle being the first line that the mouse is under
         #I stopped using break just to appease Sinfield
@@ -115,6 +146,9 @@ class MainWindow:
                 return topMiddle + 30
 
 
+
+
+    #creates the run function so that 'main.py' has something to call to execute
     def run(self):
         self.window.mainloop()
 
