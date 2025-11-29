@@ -2,6 +2,7 @@ from tkinter import *
 import time
 import TAOAT
 
+
 class MainWindow:
 
     def __init__(self):
@@ -12,8 +13,10 @@ class MainWindow:
         self.window.resizable (False,False)
         self.window.config(background="blue")
 
+        #checks if its 6
         if TAOAT.is_six(6):
             print(6)
+
 
         #Setting up the two main frames for the UI, one for the top bar (optionsFrame) and one for the main stave (staveFrame)
         optionsFrame = Frame(self.window)
@@ -40,8 +43,10 @@ class MainWindow:
         quarter = PhotoImage(file="images/quarter.png")
         half = PhotoImage(file="images/half.png")
         eighth = PhotoImage(file="images/eighth.png")
-        full = PhotoImage(file="images/full.png")
-        rest = PhotoImage(file="images/rest.png")
+        self.full = PhotoImage(file="images/full.png") #full and rest need to self.full and self.rest as I need to compare them later and so they need to exist as objects
+        self.rest = PhotoImage(file="images/rest.png") 
+
+        self.testing = 8
 
         #initialises the variable 'currentNote' and has it be set to the default of a quarter note
         self.currentNote = quarter
@@ -71,10 +76,10 @@ class MainWindow:
         buttonEighth = Button(optionsCanvas, image=eighth, command=lambda n=eighth: self.changeNote(n))
         buttonEighth.grid(column = 3, row = 0, padx = 5, pady = 5)
 
-        buttonFull = Button(optionsCanvas, image=full, command=lambda n=full: self.changeNote(n))
+        buttonFull = Button(optionsCanvas, image=self.full, command=lambda n=self.full: self.changeNote(n))
         buttonFull.grid(column = 4, row = 0, padx = 5, pady = 5)
 
-        buttonRest = Button(optionsCanvas, image=rest, command=lambda n=rest: self.changeNote(n))
+        buttonRest = Button(optionsCanvas, image=self.rest, command=lambda n=self.rest: self.changeNote(n))
         buttonRest.grid(column = 5, row = 0, padx = 5, pady = 5)
 
 
@@ -86,6 +91,7 @@ class MainWindow:
         #binds left mouse click to execute the 'leftClickEvent' function
         self.staveCanvas.bind('<1>', self.leftClickEvent)
 
+        #binds right mouse click to execute the 'rightClickEvent' function
         self.staveCanvas.bind('<3>', self.rightClickEvent)
 
 
@@ -97,14 +103,23 @@ class MainWindow:
 
 
 
-
-    #Places a note down evey time you click the mouse on the stave
-    #x position is the mouses x position, y position is the output from closest stave to snap it
+   #Function name: leftClickEvent
+   #input: current mouse position
+   #purpose: places a note at the x position of the mouse and to the closest stave line in the y direction
     def leftClickEvent(self,event):
-        self.staveCanvas.create_image((event.x),self.closestStave(event)-25,image=self.currentNote)
+
+        #Because the full note and the rest are so much smaller, they need to be displaced less when being placed
+        displacement = 25
+        if self.currentNote == self.full or self.currentNote == self.rest: displacement = 0
+
+        self.staveCanvas.create_image((event.x),self.closestStave(event)-displacement,image=self.currentNote)
+        print(self.currentNote)
         print(event.y)
 
     
+    #Function name: rightClickEvent
+    #input: current mouse position
+    #purpose: deletes whatever object(s) the mouse is currently overlapping with
     def rightClickEvent(self,event):
         overlapping = self.staveCanvas.find_overlapping(event.x, event.y, event.x + 1, event.y + 1)
         for item in overlapping:
