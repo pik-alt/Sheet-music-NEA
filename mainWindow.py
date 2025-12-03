@@ -37,22 +37,26 @@ class MainWindow:
 
 
         #List of clefs for the dropdown box
-        listClef = ["Treble","Bass"]
+        self.listClef = ["Treble","Bass"]
+
 
         #loads in images of all the notes
         quarter = PhotoImage(file="images/quarter.png")
         half = PhotoImage(file="images/half.png")
         eighth = PhotoImage(file="images/eighth.png")
-        self.full = PhotoImage(file="images/full.png") #full and rest need to self.full and self.rest as I need to compare them later and so they need to exist as objects
+        self.full = PhotoImage(file="images/full.png") 
         self.rest = PhotoImage(file="images/rest.png") 
+            #full and rest need to self.full and self.rest as I need to compare them later and so they need to exist as objects
 
-        self.testing = 8
+        self.treble = PhotoImage(file="images/treble.png")
+        self.bass = PhotoImage(file="images/bass.png")
+
 
         #initialises the variable 'currentNote' and has it be set to the default of a quarter note
         self.currentNote = quarter
 
         #initialises the variable 'currentClef' and sets it to the default of treble
-        currentClef = StringVar(value="Treble")
+        self.currentClef = StringVar(value="Treble")
 
         #draw stave lines
         for i in range(0, 5):
@@ -84,8 +88,12 @@ class MainWindow:
 
 
         #Creates the clef selection drop down menu
-        clefDropDown = OptionMenu(optionsCanvas, currentClef, *listClef)
+        clefDropDown = OptionMenu(optionsCanvas, self.currentClef, *self.listClef)
         clefDropDown.grid(column = 6, row = 0, padx = 20, pady = 5, sticky=E)
+
+
+        buttonPlaceClef = Button(optionsCanvas, text="Place", command = self.placeClef)
+        buttonPlaceClef.grid(column = 7, row = 0, padx = 5, pady = 1)
 
 
         #binds left mouse click to execute the 'leftClickEvent' function
@@ -101,6 +109,13 @@ class MainWindow:
         self.currentNote = n
         print(self.currentNote)
 
+
+
+    def placeClef(self):
+        if self.currentClef.get() == "Treble":
+            self.staveCanvas.create_image(50, 85, image=self.treble)
+        else:
+            self.staveCanvas.create_image(60, 72, image=self.bass)
 
 
    #Function name: leftClickEvent
