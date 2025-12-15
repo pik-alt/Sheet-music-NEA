@@ -58,9 +58,12 @@ class MainWindow:
         #initialises the variable 'currentClef' and sets it to the default of treble
         self.currentClef = StringVar(value="Treble")
 
+        #initialises the constant STAVE_GAP, being the distance between stave lines
+        self.STAVE_GAP = 30
+
         #draw stave lines
         for i in range(0, 5):
-            self.staveCanvas.create_line(20, 30 + (30 * i), 880, 30 + (30 * i), width = 3)
+            self.staveCanvas.create_line(20, 30 + (self.STAVE_GAP * i), 880, 30 + (self.STAVE_GAP * i), width = 3)
             self.staveCanvas.pack()
 
         #Draws the one vertical line at the beginning and the two at the end
