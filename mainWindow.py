@@ -36,11 +36,11 @@ class MainWindow:
         self.staveCanvas.config(bg="red")
 
 
-        #List of clefs for the dropdown box
+        #List of clefs for the dropdown menu
         self.listClef = ["Treble","Bass"]
 
 
-        #loads in images of all the notes
+        #loads in images of all the notes and clefs
         quarter = PhotoImage(file="images/quarter.png")
         half = PhotoImage(file="images/half.png")
         eighth = PhotoImage(file="images/eighth.png")
@@ -95,6 +95,8 @@ class MainWindow:
         clefDropDown.grid(column = 6, row = 0, padx = 20, pady = 5, sticky=E)
 
 
+        #Creates button for placing the clef
+        #Currently the user has to delete the old clef manually, that should be fixed in the future ideally
         buttonPlaceClef = Button(optionsCanvas, text="Place", command = self.placeClef)
         buttonPlaceClef.grid(column = 7, row = 0, padx = 5, pady = 1)
 
@@ -113,7 +115,7 @@ class MainWindow:
         print(self.currentNote)
 
 
-
+    #Function for the 'buttonPlaceClef' to call, checks which clef is selected and places it down
     def placeClef(self):
         if self.currentClef.get() == "Treble":
             self.staveCanvas.create_image(50, 85, image=self.treble)
@@ -132,7 +134,6 @@ class MainWindow:
 
         self.staveCanvas.create_image((event.x),self.closestStave(event)-displacement,image=self.currentNote)
         print(self.currentNote)
-        print(event.y)
 
     
     #Function name: rightClickEvent
