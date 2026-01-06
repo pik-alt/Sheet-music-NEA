@@ -1,6 +1,7 @@
 from tkinter import *
 import time
 import TAOAT
+from midiutil import *
 
 
 class MainWindow:
@@ -17,6 +18,7 @@ class MainWindow:
         if TAOAT.is_six(6):
             print(6)
 
+        self.notesList = []
 
         #Setting up the two main frames for the UI, one for the top bar (optionsFrame) and one for the main stave (staveFrame)
         optionsFrame = Frame(self.window)
@@ -132,8 +134,12 @@ class MainWindow:
         displacement = 25
         if self.currentNote == self.full or self.currentNote == self.rest: displacement = 0
 
-        self.staveCanvas.create_image((event.x),self.closestStave(event)-displacement,image=self.currentNote)
-        print(self.currentNote)
+        yPos = self.closestStave(event) - displacement
+        self.staveCanvas.create_image((event.x), yPos, image=self.currentNote)
+        #print(self.currentNote)
+
+        self.notesList.append([self.currentNote, yPos])
+        print(self.notesList)
 
     
     #Function name: rightClickEvent
@@ -144,6 +150,7 @@ class MainWindow:
         for item in overlapping:
             if item > 8: #8 is the last ID of the stave, any object after 8 is user placed
                 self.staveCanvas.delete(item)
+                self.notesList.remove([self.notesList[item - 8],])
 
 
     #Function name: closestStave
