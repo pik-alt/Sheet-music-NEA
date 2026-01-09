@@ -9,7 +9,7 @@ def merge(list1, list2):
             newlist.append(list1[index1])
             index1 += 1
         
-        elif list1[index1] < list2[index2]:
+        elif list1[index1] > list2[index2]:
             newlist.append(list2[index2])
             index2 += 1
         
@@ -42,7 +42,7 @@ def mergeSort(USlist):
     while len(newlist) != 1:
         index = 0
 
-        while index < len(newlist):
+        while index < len(newlist) - 1:
             mergedList = merge(newlist[index],newlist[index + 1])
             newlist[index] = mergedList
 
