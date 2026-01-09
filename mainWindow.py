@@ -151,15 +151,11 @@ class SheetMusic:
 
         yPos = self.closestStave(event) - displacement
         
-
         noteID = self.staveCanvas.create_image((event.x), yPos, image=self.currentNote)
 
         #Have to check whether the note is a rest or not in order to be able to pitch the notes correctly i.e. the rests are silent
-        if self.currentClef != self.rest:
-            newNote = Note(noteID, event.x, yPos, False, self.notesDict[self.currentNote])
-        else:
-            newNote = Note(noteID, event.x, yPos, True, self.notesDict[self.currentNote])
 
+        newNote = Note(noteID, event.x, yPos, self.currentNote == self.rest, self.notesDict[self.currentNote])
         self.notesList.append(newNote)
         print(self.notesList)
 
@@ -182,15 +178,26 @@ class SheetMusic:
 
     #Function name: rightClickEvent
     #input: current mouse position
-    #purpose: deletes whatever object(s) the mouse is currently overlapping with
+    #purpose: deletes whatever object the mouse is currently overlapping with
     def rightClickEvent(self,event):
         overlapping = self.staveCanvas.find_overlapping(event.x, event.y, event.x + 1, event.y + 1)
-        for item in overlapping:
+        stop = False
+        index = 0
+
+        #we reverse the list so that it deletes the newest of multiple notes if they overlap
+        overlapping = overlapping[::-1]
+
+        #we check if the mouse is overlapping with something and then delete the first user placed note
+        while not stop and overlapping:
+            item = overlapping[index]
+
             if item > 8: #8 is the last ID of the stave, any object after 8 is user placed
                 self.staveCanvas.delete(item)
 
                 index = self.linearSearch(item, self.notesList)
                 del self.notesList[index]
+                stop = True
+            index += 1
 
 
     #Function name: closestStave
@@ -206,19 +213,11 @@ class SheetMusic:
         elif mouseY <= 20:
             return 21
         
-        #cycles through the stave lines to check which ones it's inbetween, topMiddle being the first line that the mouse is under
-        #I stopped using break just to appease Sinfield
+        #Finds the first multiple of 30 that the mouse's y position is below
+        #we multiply it by 30 to get the y position of the stave line, topMiddle being the first stave line the mouse is below
         else:
+
             topMiddle = 30*(mouseY // 30)
-            
-            #stop = False
-            #currentStave = 30
-            #while not stop:
-                #if mouseY < currentStave:
-                    #topMiddle = currentStave - 30
-                    #stop = True
-                #else:
-                    #currentStave += 30
 
             #Finds whether the mouse is closest to the top stave line, in between the stave lines or the bottom stave line and returns the closest one
             if mouseY - topMiddle <= 10:
