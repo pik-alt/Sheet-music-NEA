@@ -209,14 +209,16 @@ class SheetMusic:
         #cycles through the stave lines to check which ones it's inbetween, topMiddle being the first line that the mouse is under
         #I stopped using break just to appease Sinfield
         else:
-            stop = False
-            currentStave = 30
-            while not stop:
-                if mouseY < currentStave:
-                    topMiddle = currentStave - 30
-                    stop = True
-                else:
-                    currentStave += 30
+            topMiddle = 30*(mouseY // 30)
+            
+            #stop = False
+            #currentStave = 30
+            #while not stop:
+                #if mouseY < currentStave:
+                    #topMiddle = currentStave - 30
+                    #stop = True
+                #else:
+                    #currentStave += 30
 
             #Finds whether the mouse is closest to the top stave line, in between the stave lines or the bottom stave line and returns the closest one
             if mouseY - topMiddle <= 10:
