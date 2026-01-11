@@ -168,8 +168,7 @@ class SheetMusic:
         
         noteID = self.staveCanvas.create_image((event.x), yPos, image=self.currentNote)
 
-        #Have to check whether the note is a rest or not in order to be able to pitch the notes correctly i.e. the rests are silent
-
+        print(yPos)
         #Note(ID, x position, y position, isRest, duration)
         #use a dictionary to convert the note type to a duration
         newNote = Note(noteID, event.x, yPos, self.currentNote == self.rest, self.notesDict[self.currentNote])
@@ -268,7 +267,6 @@ class SheetMusic:
                                 message="Please enter an integer for the tempo")
         
     
-    #def convertYposToPitch(Ypos):
 
 
     def createMIDI(self):
