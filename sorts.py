@@ -38,7 +38,6 @@ def mergeSort(USlist):
         item = [i]
         newlist.append(item)
 
-
     while len(newlist) != 1:
         index = 0
 
