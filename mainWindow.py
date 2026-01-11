@@ -133,6 +133,24 @@ class SheetMusic:
         }
 
 
+        #Dictionary to convert from note Y values to their midi note number
+        #because the midi specification includes sharps while my software does not,
+        #there is no function to go from one to the other so I have to use a dictionary
+        self.YposDict = {
+            135: 50, #D
+            125: 52, #E
+            110: 53, #F
+            95 : 55, #G
+            80 : 57, #A
+            65 : 59, #B
+            50 : 60, #C
+            35 : 62, #D
+            20 : 64, #E
+            5  : 65, #F
+            -4 : 67  #G
+        }
+
+
         #binds left mouse click to execute the 'leftClickEvent' function
         self.staveCanvas.bind('<1>', self.leftClickEvent)
 
