@@ -119,7 +119,8 @@ class SheetMusic:
         self.BPMtextBox.insert("1.0", "120")
 
 
-        buttonGenerateMusic = Button(optionsCanvas, text="Generate\nMIDI file",command=self.validateBPM)
+        #buttonGenerateMusic = Button(optionsCanvas, text="Generate\nMIDI file")
+        buttonGenerateMusic = Button(optionsCanvas, text="Generate\nMIDI file",command=self.createMIDI)
         buttonGenerateMusic.grid(column = 9, row = 0, padx = 100, pady = 5)
 
 
@@ -167,6 +168,7 @@ class SheetMusic:
 
     #Function for the 'buttonPlaceClef' to call, checks which clef is selected and places it down
     def placeClef(self):
+        print("place clef why is this running?")
         if self.currentClef.get() == "Treble":
             self.staveCanvas.create_image(50, 85, image=self.treble)
         else:
@@ -288,13 +290,36 @@ class SheetMusic:
 
 
     def createMIDI(self):
+
+        #sets up time to be 0 so that the track plays from the beginning 
+        #and also to have something to innumerate upon
+        time = 0
         tempo = self.validateBPM()
         if tempo:
             #taken from the midiutils example code
-            MyMIDI = MIDIFile(1)
-            MyMIDI.addTempo(0, 0, tempo)
+            myMIDI = MIDIFile(1)
+            myMIDI.addTempo(0, time, tempo)
 
-            self.notesList = mergeSort(self.notesList)
+            #sorts the note objects stored in notesList by their x position
+            sortedNotesList = mergeSort(self.notesList)
+
+            for i in range(len(sortedNotesList)):
+
+                #converts the notes Y position to MIDI pitch using the dictionary
+                activeNote = sortedNotesList[i]
+
+                pitch = self.YposDict[activeNote.outputY_POS()]
+
+                duration = activeNote.outputDURATION()
+
+                volume = 100
+
+                #makes the volume of the note 0 if it's a rest
+                if activeNote.outputIsRest(): volume = 0
+
+                #MyMIDI.addNote(track, channel, pitch, time + i, duration, volume)
+                myMIDI.addNote(0, 0, pitch, time + i, duration, volume)
+
 
 
 
