@@ -1,15 +1,23 @@
+from noteclass import Note
+
+
 #taken from the essential algorithms for A level cs
 def merge(list1, list2):
+
+
     newlist = []
+
     index1 = 0
     index2 = 0
 
+
+
     while index1 < len(list1) and index2 < len(list2):
-        if list1[index1] < list2[index2]:
+        if list1[index1].outputX_POS() < list2[index2].outputX_POS():
             newlist.append(list1[index1])
             index1 += 1
         
-        elif list1[index1] > list2[index2]:
+        elif list1[index1].outputX_POS() > list2[index2].outputX_POS():
             newlist.append(list2[index2])
             index2 += 1
         
@@ -34,10 +42,12 @@ def merge(list1, list2):
 def mergeSort(USlist):
     newlist = []
 
+    #Adds every element in US list into it's own list in newlist[]
     for i in USlist:
         item = [i]
         newlist.append(item)
 
+    #keep going while there's still things to be merged
     while len(newlist) != 1:
         index = 0
 
