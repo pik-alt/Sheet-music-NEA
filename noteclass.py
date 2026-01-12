@@ -9,3 +9,14 @@ class Note:
     def outputID(self):
         return self.ID
     
+    def outputX_POS(self):
+        return self.X_POS
+    
+    def outputY_POS(self):
+        return self.Y_POS
+    
+    def outputIsRest(self):
+        return self.isRest
+    
+    def outputDuration(self):
+        return self.DURATION
