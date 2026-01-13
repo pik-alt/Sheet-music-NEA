@@ -3,8 +3,12 @@
 
 - [x] find a better image for the eighth note as the current one is a bit thick
 
-- [ ] rename some of the more high level variables, e.g. mainWindow, MainWindow to make them less confusing
+- [x] rename some of the more high level variables, e.g. mainWindow, MainWindow to make them less confusing
 
-- [ ] reformat the docstrings according to sinfield
+- [-] reformat the docstrings according to sinfield
+
+- [ ] fix the shit with the clefs
+
+
 
 

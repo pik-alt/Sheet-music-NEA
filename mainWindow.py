@@ -1,9 +1,13 @@
+#pip install MIDIUtil
+
 from tkinter import *
 from tkinter import messagebox
 import TAOAT
 from midiutil import *
 from noteclass import Note
-from sorts import merge,mergeSort
+from sorts import mergeSort
+import subprocess, os, platform
+
 
 
 class SheetMusic:
@@ -64,6 +68,10 @@ class SheetMusic:
 
         #initialises the constant STAVE_GAP, being the distance between stave lines
         self.STAVE_GAP = 30
+
+        #sets up ClefID and has a treble clef placed down by default
+        self.clefID = self.staveCanvas.create_image(50, 85, image=self.treble)
+
 
         #draw stave lines
         for i in range(0, 5):
@@ -137,7 +145,7 @@ class SheetMusic:
         #Dictionary to convert from note Y values to their midi note number
         #because the midi specification includes sharps while my software does not,
         #there is no function to go from one to the other so I have to use a dictionary
-        self.YposDict = {
+        self.trebleYposDict = {
             135: 50, #D
             125: 52, #E
             110: 53, #F
@@ -149,6 +157,20 @@ class SheetMusic:
             20 : 64, #E
             5  : 65, #F
             -4 : 67  #G
+        }
+
+        self.bassYposDict = {
+            135: 29, #F
+            125: 31, #G
+            110: 33, #A
+            95 : 35, #B
+            80 : 36, #C
+            65 : 38, #D
+            50 : 40, #E
+            35 : 41, #F
+            20 : 43, #G
+            5  : 45, #A
+            -4 : 47  #B
         }
 
 
@@ -168,11 +190,22 @@ class SheetMusic:
 
     #Function for the 'buttonPlaceClef' to call, checks which clef is selected and places it down
     def placeClef(self):
-        print("place clef why is this running?")
+
+        deleted = False
+        index = 0
+        objectList = self.staveCanvas.find_all()
+        while not deleted:
+            if objectList[index] == self.clefID:
+                self.staveCanvas.delete(objectList[index])
+                deleted = True
+            else:
+                index += 1
+             
+
         if self.currentClef.get() == "Treble":
-            self.staveCanvas.create_image(50, 85, image=self.treble)
+            self.clefID = self.staveCanvas.create_image(50, 85, image=self.treble)
         else:
-            self.staveCanvas.create_image(60, 72, image=self.bass)
+            self.clefID = self.staveCanvas.create_image(60, 72, image=self.bass)
 
 
    #Function name: leftClickEvent
@@ -224,11 +257,11 @@ class SheetMusic:
         overlapping = overlapping[::-1]
 
         #we check if the mouse is overlapping with something and then delete the first user placed note
-        while not stop and overlapping:
+        while not stop and overlapping and index < len(overlapping):
             item = overlapping[index]
 
-            if item > 8: #8 is the last ID of the stave, any object after 8 is user placed
-                self.staveCanvas.delete(item)
+            if item > 8 and item != self.clefID: #8 is the last ID of the stave, any object after 8 is user placed
+                self.staveCanvas.delete(item)    #we also don't want to delete the clefs
 
                 index = self.linearSearch(item, self.notesList)
                 del self.notesList[index]
@@ -304,6 +337,12 @@ class SheetMusic:
             sortedNotesList = mergeSort(self.notesList)
             print(sortedNotesList)
 
+            if self.currentClef.get() == "Treble":
+                notesDict = self.trebleYposDict
+            else:
+                notesDict = self.bassYposDict
+
+
             for i in range(0, len(sortedNotesList[0])):
 
                 #converts the notes Y position to MIDI pitch using the dictionary
@@ -314,7 +353,9 @@ class SheetMusic:
                 if activeNote.outputDURATION() == 4 or activeNote.outputIsRest():
                     displacementKey = 25
 
-                pitch = self.YposDict[activeNote.outputY_POS() - displacementKey]
+
+                pitch = notesDict[activeNote.outputY_POS() - displacementKey]
+                
 
                 duration = activeNote.outputDURATION()
 
@@ -331,6 +372,12 @@ class SheetMusic:
 
             messagebox.showinfo(title="Success!",
                                     message="Created the midi file successfully")
+            
+
+            if platform.system() == 'Windows':
+                os.startfile("SHEET_MUSIC.midi")
+            else:
+                subprocess.run("SHEET_MUSIC.midi", check=True)
 
 
 

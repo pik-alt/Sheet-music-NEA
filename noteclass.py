@@ -9,6 +9,9 @@ class Note:
     def outputID(self):
         return self.ID
     
+    def outputRest(self):
+        return self.isRest
+    
     def outputX_POS(self):
         return self.X_POS
     
