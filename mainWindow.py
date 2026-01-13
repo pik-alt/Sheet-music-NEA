@@ -309,7 +309,12 @@ class SheetMusic:
                 #converts the notes Y position to MIDI pitch using the dictionary
                 activeNote = sortedNotesList[0][i]
 
-                pitch = self.YposDict[activeNote.outputY_POS()]
+                displacementKey = 0
+
+                if activeNote.outputDURATION() == 4 or activeNote.outputIsRest():
+                    displacementKey = 25
+
+                pitch = self.YposDict[activeNote.outputY_POS() - displacementKey]
 
                 duration = activeNote.outputDURATION()
 
@@ -326,11 +331,6 @@ class SheetMusic:
 
             messagebox.showinfo(title="Success!",
                                     message="Created the midi file successfully")
-
-
-
-
-            
 
 
 
