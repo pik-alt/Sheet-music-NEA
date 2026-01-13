@@ -18,5 +18,5 @@ class Note:
     def outputIsRest(self):
         return self.isRest
     
-    def outputDuration(self):
+    def outputDURATION(self):
         return self.DURATION

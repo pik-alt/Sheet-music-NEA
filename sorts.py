@@ -4,12 +4,10 @@ from noteclass import Note
 #taken from the essential algorithms for A level cs
 def merge(list1, list2):
 
-
     newlist = []
 
     index1 = 0
     index2 = 0
-
 
 
     while index1 < len(list1) and index2 < len(list2):

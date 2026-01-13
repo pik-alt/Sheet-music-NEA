@@ -302,11 +302,12 @@ class SheetMusic:
 
             #sorts the note objects stored in notesList by their x position
             sortedNotesList = mergeSort(self.notesList)
+            print(sortedNotesList)
 
-            for i in range(len(sortedNotesList)):
+            for i in range(0, len(sortedNotesList[0])):
 
                 #converts the notes Y position to MIDI pitch using the dictionary
-                activeNote = sortedNotesList[i]
+                activeNote = sortedNotesList[0][i]
 
                 pitch = self.YposDict[activeNote.outputY_POS()]
 
@@ -319,6 +320,12 @@ class SheetMusic:
 
                 #MyMIDI.addNote(track, channel, pitch, time + i, duration, volume)
                 myMIDI.addNote(0, 0, pitch, time + i, duration, volume)
+
+            with open("SHEET_MUSIC.midi", "wb") as output_file:
+                    myMIDI.writeFile(output_file)
+
+            messagebox.showinfo(title="Success!",
+                                    message="Created the midi file successfully")
 
 
 
