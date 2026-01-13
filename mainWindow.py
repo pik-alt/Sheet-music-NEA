@@ -7,7 +7,7 @@ from midiutil import *
 from noteclass import Note
 from sorts import mergeSort
 import subprocess, os, platform
-
+import math
 
 
 class SheetMusic:
@@ -221,12 +221,11 @@ class SheetMusic:
         
         noteID = self.staveCanvas.create_image((event.x), yPos, image=self.currentNote)
 
-        print(yPos)
         #Note(ID, x position, y position, isRest, duration)
         #use a dictionary to convert the note type to a duration
         newNote = Note(noteID, event.x, yPos, self.currentNote == self.rest, self.notesDict[self.currentNote])
         self.notesList.append(newNote)
-        print(self.notesList)
+
 
 
 
@@ -342,6 +341,7 @@ class SheetMusic:
             else:
                 notesDict = self.bassYposDict
 
+            totalJump = 0
 
             for i in range(0, len(sortedNotesList[0])):
 
@@ -365,7 +365,9 @@ class SheetMusic:
                 if activeNote.outputIsRest(): volume = 0
 
                 #MyMIDI.addNote(track, channel, pitch, time + i, duration, volume)
-                myMIDI.addNote(0, 0, pitch, time + i, duration, volume)
+                myMIDI.addNote(0, 0, pitch, time + i + totalJump, 2*duration, volume)
+
+                totalJump = totalJump + math.floor(activeNote.outputDURATION())
 
             with open("SHEET_MUSIC.midi", "wb") as output_file:
                     myMIDI.writeFile(output_file)
