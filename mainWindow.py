@@ -302,6 +302,7 @@ class SheetMusic:
             return topMiddle + 30
 
 
+
     #Function name: closestX
     #Input: mouse position
     #output: the nearest valid x position to the mouse
@@ -318,6 +319,8 @@ class SheetMusic:
 
         if mouseX - middleLeft <= 20: return middleLeft
         else: return middleLeft + 40
+
+
 
 
     #Function name: validateBPM
@@ -341,7 +344,33 @@ class SheetMusic:
             messagebox.showinfo(title="Error", 
                                 message="Please enter an integer for the tempo")
         
-    
+
+    def totalElements(self, list):
+        return sum(len(l) for l in list)
+
+
+    def notesXtoSameList(self, notesList):
+
+        listOfGroupedNotes = []
+
+        
+        for i in range(0, len(notesList) - self.totalElements(listOfGroupedNotes) + 1):
+            stop = False
+            index = 0
+            while not stop: 
+                if notesList[0][index].outputX_POS() == notesList[0][index+1].outputX_POS():
+                    index += 1
+            
+                else: stop = True
+            
+            tempNotesList = []
+            for j in range(0, index+1):
+                tempNotesList.append(notesList[0][j])
+
+            listOfGroupedNotes.append(tempNotesList)
+
+        print(listOfGroupedNotes)
+        return listOfGroupedNotes
 
     #Function name: createMIDI
     #input: none, activated by pressing the associated button
@@ -360,7 +389,8 @@ class SheetMusic:
 
             #sorts the note objects stored in notesList by their x position
             sortedNotesList = mergeSort(self.notesList)
-            print(sortedNotesList)
+            a = self.notesXtoSameList(sortedNotesList)
+            print(a)
 
 
             #changes which dictionary and by extension what notes to play based on the current clef
