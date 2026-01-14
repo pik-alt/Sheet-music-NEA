@@ -9,6 +9,7 @@
 
 - [ ] fix the shit with the clefs
 
+-[ ] no alto
 
 
 

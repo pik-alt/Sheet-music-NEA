@@ -18,7 +18,7 @@ class SheetMusic:
         self.window.title("Test")
         self.window.geometry("1000x500")
         self.window.resizable (False,False)
-        self.window.config(background="blue")
+        self.window.config(background="darkgray")
 
         #checks if its 6
         if TAOAT.is_six(6):
@@ -37,11 +37,11 @@ class SheetMusic:
         #Creates the two canvasas to be able to import images onto them
         #Currently very different colours just so I can see what I'm doing
         optionsCanvas = Canvas(optionsFrame, width = 930, height = 100)
-        optionsCanvas.config(bg="green")
+        optionsCanvas.config(bg="lightgray")
         optionsCanvas.pack()
 
         self.staveCanvas = Canvas(staveFrame, width = 900, height = 200)
-        self.staveCanvas.config(bg="red")
+        self.staveCanvas.config(bg="white")
 
 
         #List of clefs for the dropdown menu
@@ -187,13 +187,16 @@ class SheetMusic:
         self.currentNote = n
         print(self.currentNote)
 
-
-    #Function for the 'buttonPlaceClef' to call, checks which clef is selected and places it down
+    #Function name: placeClef
+    #input: none, activated by pressing the "place clef" button
+    #purpose: deletes the current clef (if there is one) and places down the new one
     def placeClef(self):
 
         deleted = False
         index = 0
-        objectList = self.staveCanvas.find_all()
+        objectList = self.staveCanvas.find_all() #returns every object within the canvas
+
+        #linear search to sort through the canvas to find the object which matches the clefID and deletes it
         while not deleted:
             if objectList[index] == self.clefID:
                 self.staveCanvas.delete(objectList[index])
@@ -201,7 +204,7 @@ class SheetMusic:
             else:
                 index += 1
              
-
+        #draws the current clef based on the value in the textbox
         if self.currentClef.get() == "Treble":
             self.clefID = self.staveCanvas.create_image(50, 85, image=self.treble)
         else:
@@ -216,22 +219,25 @@ class SheetMusic:
         #Because the full note and the rest are so much smaller, they need to be displaced less when being placed
         displacement = 25
         if self.currentNote == self.full or self.currentNote == self.rest: displacement = 0
-
         yPos = self.closestStave(event) - displacement
-        
-        noteID = self.staveCanvas.create_image((event.x), yPos, image=self.currentNote)
+        xPos = self.closestX(event)
+
+        print(xPos)
+        noteID = self.staveCanvas.create_image(xPos, yPos, image=self.currentNote)
 
         #Note(ID, x position, y position, isRest, duration)
         #use a dictionary to convert the note type to a duration
-        newNote = Note(noteID, event.x, yPos, self.currentNote == self.rest, self.notesDict[self.currentNote])
+        newNote = Note(noteID, xPos, yPos, self.currentNote == self.rest, self.notesDict[self.currentNote])
         self.notesList.append(newNote)
+
+
 
 
 
 
     #Function name: linearSearch
     #input: the item you are looking for, the list that contains the item
-    #parameter: item is in the list, ID is the first item in each array item
+    #parameter: item is in the list, item is an object with the .outputID() function
     #purpose: searches through the list and returns the item's index
     def linearSearch(self, wantedItem, list):
         found = False
@@ -283,18 +289,35 @@ class SheetMusic:
         
         #Finds the first multiple of 30 that the mouse's y position is below
         #we multiply it by 30 to get the y position of the stave line, topMiddle being the first stave line the mouse is below
+
+
+        topMiddle = 30*(mouseY // 30)
+
+        #Finds whether the mouse is closest to the top stave line, in between the stave lines or the bottom stave line and returns the closest one
+        if mouseY - topMiddle <= 10:
+            return topMiddle
+        elif mouseY - topMiddle > 10 and mouseY - topMiddle < 20:
+            return topMiddle + 15
         else:
+            return topMiddle + 30
 
-            topMiddle = 30*(mouseY // 30)
 
-            #Finds whether the mouse is closest to the top stave line, in between the stave lines or the bottom stave line and returns the closest one
-            if mouseY - topMiddle <= 10:
-                return topMiddle
-            elif mouseY - topMiddle > 10 and mouseY - topMiddle < 20:
-                return topMiddle + 15
-            else:
-                return topMiddle + 30
+    #Function name: closestX
+    #Input: mouse position
+    #output: the nearest valid x position to the mouse
+    #purpose: used to snap the note to certain x positions
+    def closestX(self, event):
+        mouseX = (event.x)
+        
+        #checks if the mouse is too far to the left or right
+        if mouseX < 80: return 80
+        elif mouseX > 840: return 840
 
+
+        middleLeft = 40*(mouseX // 40)
+
+        if mouseX - middleLeft <= 20: return middleLeft
+        else: return middleLeft + 40
 
 
     #Function name: validateBPM
@@ -320,7 +343,9 @@ class SheetMusic:
         
     
 
-
+    #Function name: createMIDI
+    #input: none, activated by pressing the associated button
+    #output: creates a file called "SHEET_MUSIC.midi" that then plays automatically
     def createMIDI(self):
 
         #sets up time to be 0 so that the track plays from the beginning 
@@ -328,6 +353,7 @@ class SheetMusic:
         time = 0
         tempo = self.validateBPM()
         if tempo:
+
             #taken from the midiutils example code
             myMIDI = MIDIFile(1)
             myMIDI.addTempo(0, time, tempo)
@@ -336,10 +362,12 @@ class SheetMusic:
             sortedNotesList = mergeSort(self.notesList)
             print(sortedNotesList)
 
+
+            #changes which dictionary and by extension what notes to play based on the current clef
             if self.currentClef.get() == "Treble":
-                notesDict = self.trebleYposDict
+                pitchDict = self.trebleYposDict
             else:
-                notesDict = self.bassYposDict
+                pitchDict = self.bassYposDict
 
             totalJump = 0
 
@@ -348,13 +376,14 @@ class SheetMusic:
                 #converts the notes Y position to MIDI pitch using the dictionary
                 activeNote = sortedNotesList[0][i]
 
+
+                #undos the Y position displacement of the full note and rest, caused by them being so much smaller
                 displacementKey = 0
 
                 if activeNote.outputDURATION() == 4 or activeNote.outputIsRest():
                     displacementKey = 25
 
-
-                pitch = notesDict[activeNote.outputY_POS() - displacementKey]
+                pitch = pitchDict[activeNote.outputY_POS() - displacementKey]
                 
 
                 duration = activeNote.outputDURATION()
@@ -367,7 +396,11 @@ class SheetMusic:
                 #MyMIDI.addNote(track, channel, pitch, time + i, duration, volume)
                 myMIDI.addNote(0, 0, pitch, time + i + totalJump, 2*duration, volume)
 
+                #makes it so that if you place down a note of length n, the next n times on the midi file
+                #are filled with silence as to let the note play out to its full extent, this pushes all the
+                #other notes forward, and so we add totalJump to the addNote function always, to keep in sync with all the other notes
                 totalJump = totalJump + math.floor(activeNote.outputDURATION())
+
 
             with open("SHEET_MUSIC.midi", "wb") as output_file:
                     myMIDI.writeFile(output_file)
@@ -376,6 +409,7 @@ class SheetMusic:
                                     message="Created the midi file successfully")
             
 
+            #plays the generated file automatically based on your OS
             if platform.system() == 'Windows':
                 os.startfile("SHEET_MUSIC.midi")
             else:
