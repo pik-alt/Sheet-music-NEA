@@ -365,39 +365,34 @@ class SheetMusic:
     #this is the worst thing i've ever written nothing here makes sense oh my god
     #how the hell am i even gonna write about this on my nea
     def notesXtoSameList(self, notesList):
-        fuck = False
         listOfGroupedNotes = []
-        index = 0
         
-        while index < (len(notesList[0]) - self.totalElements(listOfGroupedNotes) + 2):
+        #runs while there's still notes to be added onto the new list
+        while len(notesList[0])!= 0:
             stop = False
 
             tempIndex = 0
-            while not stop and index < len(notesList[0]) - 1: 
-                print(notesList[0][index].outputX_POS())
-                print(notesList[0][index+1].outputX_POS())
-                if notesList[0][index].outputX_POS() == notesList[0][index+1].outputX_POS():
-                    index += 1
+            while not stop and tempIndex < len(notesList[0])-1: 
+
+                #checks if two notes next to eachother in the list share the x position
+                if notesList[0][tempIndex].outputX_POS() == notesList[0][tempIndex+1].outputX_POS():
                     tempIndex += 1
 
                 else:
                     stop = True
-                    index +=1
+
+            #tempIndex should finally be 1 more than the last shared xPos item in the list for the loop coming up
+            tempIndex += 1
                     
             
             tempNotesList = []
-            if fuck:
-                for j in range(0, tempIndex+1):
-                    tempNotesList.append(notesList[0][j + index -1])
 
-            else:
-                for j in range(0, tempIndex+1):
-                    tempNotesList.append(notesList[0][j])
+            for j in range(0, tempIndex):
+                tempNotesList.append(notesList[0][0])
+                del notesList[0][0]
 
             listOfGroupedNotes.append(tempNotesList)
-            fuck = True
 
-        print(listOfGroupedNotes)
         return listOfGroupedNotes
 
     #Function name: createMIDI
