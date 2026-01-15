@@ -349,25 +349,41 @@ class SheetMusic:
         return sum(len(l) for l in list)
 
 
+    #fuck this algorithm oh my god this sucks so much why the fuck do i have to finish this jesus christ
+    #this is the worst thing i've ever written nothing here makes sense oh my god
+    #how the hell am i even gonna write about this on my nea
     def notesXtoSameList(self, notesList):
-
+        fuck = False
         listOfGroupedNotes = []
-
+        index = 0
         
-        for i in range(0, len(notesList) - self.totalElements(listOfGroupedNotes) + 1):
+        while index < (len(notesList[0]) - self.totalElements(listOfGroupedNotes) + 2):
             stop = False
-            index = 0
-            while not stop: 
+
+            tempIndex = 0
+            while not stop and index < len(notesList[0]) - 1: 
+                print(notesList[0][index].outputX_POS())
+                print(notesList[0][index+1].outputX_POS())
                 if notesList[0][index].outputX_POS() == notesList[0][index+1].outputX_POS():
                     index += 1
-            
-                else: stop = True
+                    tempIndex += 1
+
+                else:
+                    stop = True
+                    index +=1
+                    
             
             tempNotesList = []
-            for j in range(0, index+1):
-                tempNotesList.append(notesList[0][j])
+            if fuck:
+                for j in range(0, tempIndex+1):
+                    tempNotesList.append(notesList[0][j + index -1])
+
+            else:
+                for j in range(0, tempIndex+1):
+                    tempNotesList.append(notesList[0][j])
 
             listOfGroupedNotes.append(tempNotesList)
+            fuck = True
 
         print(listOfGroupedNotes)
         return listOfGroupedNotes
