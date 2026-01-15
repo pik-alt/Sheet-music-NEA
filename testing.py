@@ -1,2 +1,2 @@
-for i in range(0,2):
-    print(i)
+import math
+print(math.log2(0.5))
