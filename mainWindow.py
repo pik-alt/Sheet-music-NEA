@@ -400,13 +400,12 @@ class SheetMusic:
         if tempo:
 
             #taken from the midiutils example code
-            myMIDI = MIDIFile(1)
+            myMIDI = MIDIFile(11)
             myMIDI.addTempo(0, time, tempo)
 
             #sorts the note objects stored in notesList by their x position
             sortedNotesList = mergeSort(self.notesList)
-            a = self.notesXtoSameList(sortedNotesList)
-            print(a)
+            sortedNotesList = self.notesXtoSameList(sortedNotesList)
 
 
             #changes which dictionary and by extension what notes to play based on the current clef
@@ -417,34 +416,36 @@ class SheetMusic:
 
             totalJump = 0
 
-            for i in range(0, len(sortedNotesList[0])):
+            for i in range(0, len(sortedNotesList)):
 
-                #converts the notes Y position to MIDI pitch using the dictionary
-                activeNote = sortedNotesList[0][i]
+                for j in range(0,len(sortedNotesList[i])):
+                    
+                    #converts the notes Y position to MIDI pitch using the dictionary
+                    activeNote = sortedNotesList[i][j]
 
 
-                #undos the Y position displacement of the full note and rest, caused by them being so much smaller
-                displacementKey = 0
+                    #undos the Y position displacement of the full note and rest, caused by them being so much smaller
+                    displacementKey = 0
 
-                if activeNote.outputDURATION() == 4 or activeNote.outputIsRest():
-                    displacementKey = 25
+                    if activeNote.outputDURATION() == 4 or activeNote.outputIsRest():
+                        displacementKey = 25
 
-                pitch = pitchDict[activeNote.outputY_POS() - displacementKey]
-                
+                    pitch = pitchDict[activeNote.outputY_POS() - displacementKey]
+                    
 
-                duration = activeNote.outputDURATION()
+                    duration = activeNote.outputDURATION()
 
-                volume = 100
+                    volume = 100
 
-                #makes the volume of the note 0 if it's a rest
-                if activeNote.outputIsRest(): volume = 0
+                    #makes the volume of the note 0 if it's a rest
+                    if activeNote.outputIsRest(): volume = 0
 
-                #MyMIDI.addNote(track, channel, pitch, time + i, duration, volume)
-                myMIDI.addNote(0, 0, pitch, time + i + totalJump, 2*duration, volume)
+                    #MyMIDI.addNote(track, channel, pitch, time + i, duration, volume)
+                    myMIDI.addNote(j, 0, pitch, time + i + totalJump, 2*duration, volume)
 
-                #makes it so that if you place down a note of length n, the next n times on the midi file
-                #are filled with silence as to let the note play out to its full extent, this pushes all the
-                #other notes forward, and so we add totalJump to the addNote function always, to keep in sync with all the other notes
+                    #makes it so that if you place down a note of length n, the next n times on the midi file
+                    #are filled with silence as to let the note play out to its full extent, this pushes all the
+                    #other notes forward, and so we add totalJump to the addNote function always, to keep in sync with all the other notes
                 totalJump = totalJump + math.floor(activeNote.outputDURATION())
 
 
