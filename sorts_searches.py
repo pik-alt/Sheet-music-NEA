@@ -57,3 +57,38 @@ def mergeSort(USlist):
             index += 1
     
     return newlist
+
+
+
+def linearSearch(self, wantedItem, list):
+    found = False
+    index = 0
+    #Item will always be in the array, we don't need a condition if index > len(list)
+    while found != True:
+        if list[index].outputID() == wantedItem:
+            found = True
+            return index
+        else: index += 1
+
+
+
+def binarySearch(itemToFind, list):
+    found = False
+    
+    first = 0
+
+    last = len(list) - 1
+    while first <= last and not found:
+        midpoint = (first+last) // 2
+
+        if list[midpoint].outputID() == itemToFind:
+            found = True
+            return midpoint
+        
+        else:
+            if list[midpoint].outputID() < itemToFind:
+                first = midpoint + 1
+            
+            else:
+                last = midpoint - 1
+    

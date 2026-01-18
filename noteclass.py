@@ -1,16 +1,14 @@
 class Note:
-    def __init__(self,ID,X_POS,Y_POS,isRest,DURATION):
-        self.ID = ID
-        self.X_POS = X_POS
-        self.Y_POS = Y_POS
-        self.isRest = isRest
-        self.DURATION = DURATION
+    def __init__(self,ID,X_POS,Y_POS,isRest,DURATION,accent):
+        self.ID = ID #int
+        self.X_POS = X_POS #int
+        self.Y_POS = Y_POS #int
+        self.isRest = isRest #bool
+        self.DURATION = DURATION #int
+        self.accent = accent #int
 
     def outputID(self):
         return self.ID
-    
-    def outputRest(self):
-        return self.isRest
     
     def outputX_POS(self):
         return self.X_POS
@@ -23,3 +21,10 @@ class Note:
     
     def outputDURATION(self):
         return self.DURATION
+    
+    def outputAccent(self):
+        return self.accent
+    
+    def setAccent(self, newAccent):
+        self.accent = newAccent
+    

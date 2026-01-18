@@ -6,7 +6,7 @@ from tkinter import filedialog
 import TAOAT
 from midiutil import *
 from noteclass import Note
-from sorts import mergeSort
+from sorts_searches import mergeSort, linearSearch, binarySearch
 import subprocess, os, platform
 import math
 
@@ -56,18 +56,18 @@ class SheetMusic:
         self.canPlaceFlat = False
 
         #loads in images of all the notes, clefs and accents
-        self.quarter = PhotoImage(file="images/quarter.png")
-        self.half = PhotoImage(file="images/half.png")
-        self.eighth = PhotoImage(file="images/eighth.png")
-        self.full = PhotoImage(file="images/full.png") 
-        self.rest = PhotoImage(file="images/rest.png") 
+        self.quarter = PhotoImage(file="images/quarter.png")#pyimage1
+        self.half = PhotoImage(file="images/half.png")      #pyimage2
+        self.eighth = PhotoImage(file="images/eighth.png")  #pyimage3
+        self.full = PhotoImage(file="images/full.png")      #pyimage4
+        self.rest = PhotoImage(file="images/rest.png")      #pyimage5
 
 
-        self.treble = PhotoImage(file="images/treble.png")
-        self.bass = PhotoImage(file="images/bass.png")
+        self.treble = PhotoImage(file="images/treble.png") 
+        self.bass = PhotoImage(file="images/bass.png")      
 
-        self.flat = PhotoImage(file="images/flat.png")
-        self.sharp = PhotoImage(file="images/sharp.png")
+        self.flat = PhotoImage(file="images/flat.png")      #pyimage8
+        self.sharp = PhotoImage(file="images/sharp.png")    #pyimage9
 
         #initialises the variable 'currentNote' and has it be set to the default of a quarter note
         self.currentNote = self.quarter
@@ -178,6 +178,11 @@ class SheetMusic:
             self.flat  : "flat"
         }
 
+        self.pyimageToAccentDict = {
+            "pyimage8" : self.flat,
+            "pyimage9" : self.sharp
+        }
+
 
         #Dictionary to convert from note Y values to their midi note number
         #because the midi specification includes sharps while my software does not,
@@ -218,6 +223,12 @@ class SheetMusic:
         self.staveCanvas.bind('<3>', self.rightClickEvent)
 
 
+
+
+    #Function name: deleteAll
+    #Input: None, activated by pressing the corresponding button
+    #Output: dialogue box to confirm your choice
+    #purpose: deletes all the notes on the stave
     def deleteAll(self):
 
         answer = messagebox.askyesno(title= "Confirmation",
@@ -241,11 +252,14 @@ class SheetMusic:
             
 
 
+
+
     #Takes n as the name of the note to change
     #n is the parameter of the lambda function which we change for every button
     def changeNote(self,n):
         self.currentNote = n
         print(self.currentNote)
+
 
 
 
@@ -273,46 +287,82 @@ class SheetMusic:
             self.clefID = self.staveCanvas.create_image(60, 72, image=self.bass)
 
 
+
+
+
    #Function name: leftClickEvent
    #input: current mouse position
    #purpose: places a note at the x position of the mouse and to the closest stave line in the y direction
     def leftClickEvent(self,event):
 
 
+        
+
+
+
         #about to place down sharp or clef
         if self.currentNote == self.sharp or self.currentNote == self.flat:
 
             overlapping = self.staveCanvas.find_overlapping(event.x, event.y, event.x + 1, event.y + 1)
+
+            #reverses the list so that the first items are the more recently placed down ones
             overlapping = overlapping[::-1]
         
 
             #checks that the mouse is above something, that thing is a note and is also not the clef
+            #we use overlapping[0] as its the latest item placed down
+            #we don't need to iterate through because the mouse can't be over the clef and a note simulatenously
             aboveNote = overlapping and overlapping[0] > 8 and overlapping[0] != self.clefID
 
+            #we don't want to be able to accent rests
+            aboveNoteIndex = binarySearch(overlapping[0], self.notesList)
+            if self.notesList[aboveNoteIndex].outputIsRest(): aboveNote = False
+
+            #default displacement for the sharp symbol
+            displacementY = 5
+            displacementX = 20
+
+
+            #placing the accent
             if aboveNote:
-                yPos = self.closestStave(event) + 5
-                xPos = self.closestX(event) - 20
 
-                self.staveCanvas.create_image(xPos, yPos, image=self.currentNote)
+                #sharp and flat have different displacement due to their size and shape
+                if self.currentNote == self.flat:
+                    displacementY = -3
+                    displacementX = 17
 
-                
-                overlapping[0].setAccent(self.accentDict[self.currentNote])
+                yPos = self.closestStave(event) + displacementY # position displacement to make the accent appear in the correct place
+                xPos = self.closestX(event) - displacementX   #
+
+                accentID = self.staveCanvas.create_image(xPos, yPos, image=self.currentNote)
+
+                #finds the note the accent is attatched to and sets the accent in the notes properties
+                #overlapping[0] is the note we want's ID
+                #noteList is out of order so we have to use linear search
+                overlappingNoteIndex = binarySearch(overlapping[0], self.notesList)
+                self.notesList[overlappingNoteIndex].setAccent(accentID)
 
 
+
+        #
         #placing down a note
+        #
+
         else:
+
             #Because the full note and the rest are so much smaller, they need to be displaced less when being placed
             displacement = 25
+
             if self.currentNote == self.full or self.currentNote == self.rest: displacement = 0
             yPos = self.closestStave(event) - displacement
             xPos = self.closestX(event)
 
-            print(xPos)
+
             noteID = self.staveCanvas.create_image(xPos, yPos, image=self.currentNote)
 
-            #Note(ID, x position, y position, isRest, duration)
+            #Note(ID, x position, y position, isRest, duration, accent) default accent is none
             #use a dictionary to convert the note type to a duration
-            newNote = Note(noteID, xPos, yPos, self.currentNote == self.rest, self.notesDict[self.currentNote], "natural")
+            newNote = Note(noteID, xPos, yPos, self.currentNote == self.rest, self.notesDict[self.currentNote], None)
             self.notesList.append(newNote)
 
 
@@ -320,19 +370,6 @@ class SheetMusic:
 
 
 
-    #Function name: linearSearch
-    #input: the item you are looking for, the list that contains the item
-    #parameter: item is in the list, item is an object with the .outputID() function
-    #purpose: searches through the list and returns the item's index
-    def linearSearch(self, wantedItem, list):
-        found = False
-        index = 0
-        #Item will always be in the array, we don't need a condition if index > len(list)
-        while found != True:
-            if list[index].outputID() == wantedItem:
-                found = True
-                return index
-            else: index += 1
 
 
     #Function name: rightClickEvent
@@ -353,10 +390,19 @@ class SheetMusic:
             if item > 8 and item != self.clefID: #8 is the last ID of the stave, any object after 8 is user placed
                 self.staveCanvas.delete(item)    #we also don't want to delete the clefs
 
-                index = self.linearSearch(item, self.notesList)
+                index = binarySearch(item, self.notesList)
+
+                #if the note has an accent, delete the accent
+                #outputAccent gives the ID which is what we need
+                if self.notesList[index].outputAccent():
+                    self.staveCanvas.delete(self.notesList[index].outputAccent())
+
+                #delete it from the list of notes
                 del self.notesList[index]
                 stop = True
             index += 1
+
+
 
 
     #Function name: closestStave
@@ -466,6 +512,9 @@ class SheetMusic:
 
         return listOfGroupedNotes
 
+
+
+
     #Function name: createMIDI
     #input: none, activated by pressing the associated button
     #output: creates a file called "SHEET_MUSIC.midi" that then plays automatically
@@ -521,6 +570,16 @@ class SheetMusic:
                     #makes the volume of the note 0 if it's a rest
                     if activeNote.outputIsRest(): volume = 0
 
+                    #if the note has an accent we need to change the pitch
+                    if activeNote.outputAccent() != None:
+
+                        #finds the pyimage name of the accent with "staveCanvas.itemcget()" and puts that through a dictionary to get the actual type
+                        accent = self.staveCanvas.itemcget(activeNote.outputAccent(), "image")
+                        accent = self.pyimageToAccentDict[accent]
+
+                        if accent == self.sharp: pitch += 1
+                        else: pitch -= 1
+
                     #MyMIDI.addNote(track, channel, pitch, time, duration, volume)
                     myMIDI.addNote(j, 0, pitch, time + i + totalJump, 2*duration, volume)
 
@@ -544,6 +603,9 @@ class SheetMusic:
                 subprocess.run("SHEET_MUSIC.midi", check=True)
 
 
+
+
+
     def importFile(self):
 
         self.deleteAll()
@@ -559,21 +621,40 @@ class SheetMusic:
             contents = f.read()
             contents = contents.splitlines()
 
+            #used later for placing down the correct note
             nonRests=[self.eighth,self.quarter,self.half,self.full]
 
             for i in range(len(contents)):
+
+                #
+                # activeNote(xPos, Ypos, isRest, accent, duration)
+                #
+
                 activeNote = contents[i].split(",")
 
-
+                #activeNote[2] is a bool on if the note is a rest or not
                 if activeNote[2] == "True":
 
                     noteID = self.staveCanvas.create_image(int(activeNote[0]),int(activeNote[1]),image=self.rest)
                 
                 else:
-                    noteIndex = math.log2(int(activeNote[3])) + 1 #fucked up solution
+                    noteIndex = math.log2(int(activeNote[4])) + 1 #fucked up solution
+                                                                  #activeNote[4] gives duration of note
 
                     noteID = self.staveCanvas.create_image(int(activeNote[0]),int(activeNote[1]),image=nonRests[int(noteIndex)])
 
+                    #
+                    #
+                    #
+                    #
+                    #
+                    #   ADD SOME SHIT ABOUT FUCK FUCK UHHH NOTES AND ACCENTS, READ THE CURRENT NOTE
+                    #   AND THEN ADD THE CORRECT ACCENT TO THE FUCK FUCK IM SO I CAN'T FOCUS CHRIST
+                    #
+                    #
+                    #
+                    #
+                    ##
 
 
             
@@ -598,9 +679,20 @@ class SheetMusic:
             activeNote = sortedNotes[0]
             for i in range(len(sortedNotes[0])):
 
+                writtenAccent = "none"
+                if activeNote[i].outputAccent != None:
+                    accent = self.staveCanvas.itemcget(activeNote[i].outputAccent, "image")
+                    accent = self.pyimageToAccentDict[accent]
+
+                    if accent == self.sharp: writtenAccent = "sharp"
+                    else: writtenAccent = "flat"
+                
+                    
+                
                 file.write(str(activeNote[i].outputX_POS()) + "," +
                            str(activeNote[i].outputY_POS()) + "," +
                            str(activeNote[i].outputIsRest()) + "," +
+                           writtenAccent +
                            str(activeNote[i].outputDURATION()) + "\n")
                 
             file.close()
