@@ -7,9 +7,10 @@
 
 - [-] reformat the docstrings according to sinfield
 
-- [ ] fix the shit with the clefs
+- [x] fix the shit with the clefs
 
--[ ] no alto
+- [x] no alto
 
+- [ ] add sharps and flats potentially
 
 
