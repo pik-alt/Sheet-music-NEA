@@ -241,18 +241,20 @@ class SheetMusic:
 
             objectList = self.staveCanvas.find_all()
             index = 9
+            print(len(objectList))
 
-            while len(self.notesList) != 0:
+            #while theres still notes to be deleted
+            while len(objectList) != 9:
                 item = objectList[index]
                 if item != self.clefID:
+
+                    #checking to see if current item is an accent or not
+                    itemType = self.staveCanvas.itemcget(item, "image")
+                    if not( itemType == "pyimage8" or itemType == "pyimage9"): #pyimage 8 and 9 are flat and sharp symbols
+
+                        del self.notesList[0]
+
                     self.staveCanvas.delete(item)
-
-                    #check if the note has an accent and delete it
-                    index = binarySearch(item, self.notesList)
-                    if self.notesList[index].outputAccent():
-                        self.staveCanvas.delete(self.notesList[index].outputAccent())
-
-                    del self.notesList[0]
                 index += 1
             
 
@@ -317,19 +319,23 @@ class SheetMusic:
             #checks that the mouse is above something, that thing is a note and is also not the clef
             #we use overlapping[0] as its the latest item placed down
             #we don't need to iterate through because the mouse can't be over the clef and a note simulatenously
+            print(overlapping)
             aboveNote = overlapping and overlapping[0] > 8 and overlapping[0] != self.clefID
 
-            #we don't want to be able to accent rests
-            aboveNoteIndex = binarySearch(overlapping[0], self.notesList)
-            if self.notesList[aboveNoteIndex].outputIsRest(): aboveNote = False
+            if aboveNote:
+                #we don't want to be able to accent rests
+                aboveNoteIndex = binarySearch(overlapping[0], self.notesList, Note.outputID)
+                if self.notesList[aboveNoteIndex].outputIsRest(): aboveNote = False
 
-            #default displacement for the sharp symbol
-            displacementY = 25
-            displacementX = 20
+            
 
 
             #placing the accent
             if aboveNote:
+
+                #default displacement for the sharp symbol
+                displacementY = 25
+                displacementX = 20
 
                 #sharp and flat have different displacement due to their size and shape
                 if self.currentNote == self.flat:
@@ -344,8 +350,7 @@ class SheetMusic:
 
                 #finds the note the accent is attatched to and sets the accent in the notes properties
                 #overlapping[0] is the note we want's ID
-                #noteList is out of order so we have to use linear search
-                overlappingNoteIndex = binarySearch(overlapping[0], self.notesList)
+                overlappingNoteIndex = binarySearch(overlapping[0], self.notesList, Note.outputID)
                 self.notesList[overlappingNoteIndex].setAccent(accentID)
 
 
@@ -393,28 +398,38 @@ class SheetMusic:
         while not stop and overlapping and index < len(overlapping):
             item = overlapping[index]
 
+            #found valid note or accent
             if item > 8 and item != self.clefID: #8 is the last ID of the stave, any object after 8 is user placed
                                                  #we also don't want to delete the clefs
                 
-                index = binarySearch(item, self.notesList)
+                
 
 
 
                 #if user has clicked on an accent by itself
-                if self.notesList[index].outputAccent() == item:
-                    self.notesList[index].setAccent(None)
+                objectType = self.staveCanvas.itemcget(item, "image")
+
+                if objectType == "pyimage8" or objectType == "pyimage9": #pyimage 8 and 9 are the images for flat and rest respectively
+                    accentIndex = binarySearch(item, self.notesList, Note.outputAccent)
+
+                    self.notesList[accentIndex].setAccent(None)
+
                 
                 #user clicked on a note
                 else:
 
-                    #delete it from the list of notes
-                    del self.notesList[index]
+                    index = binarySearch(item, self.notesList, Note.outputID)
 
                     #if the note has an accent, delete the accent
                     #outputAccent gives the ID which is what we need
 
                     if self.notesList[index].outputAccent():
                         self.staveCanvas.delete(self.notesList[index].outputAccent())
+
+                    #delete it from the list of notes
+                    del self.notesList[index]
+
+                    
 
 
                 self.staveCanvas.delete(item)     
@@ -589,6 +604,8 @@ class SheetMusic:
                     #makes the volume of the note 0 if it's a rest
                     if activeNote.outputIsRest(): volume = 0
 
+
+
                     #if the note has an accent we need to change the pitch
                     if activeNote.outputAccent() != None:
 
@@ -598,6 +615,8 @@ class SheetMusic:
 
                         if accent == self.sharp: pitch += 1
                         else: pitch -= 1
+
+
 
                     #MyMIDI.addNote(track, channel, pitch, time, duration, volume)
                     myMIDI.addNote(j, 0, pitch, time + i + totalJump, 2*duration, volume)
@@ -667,18 +686,7 @@ class SheetMusic:
 
                     noteID = self.staveCanvas.create_image(int(xPos),int(yPos),image=nonRests[int(noteIndex)])
 
-                    #
-                    #
-                    #
-                    #
-                    #
-                    #   ADD SOME SHIT ABOUT FUCK FUCK UHHH NOTES AND ACCENTS, READ THE CURRENT NOTE
-                    #   AND THEN ADD THE CORRECT ACCENT TO THE FUCK FUCK IM SO I CAN'T FOCUS CHRIST
-                    #
-                    #
-                    #
-                    #
-                    ##
+            
 
                     #default case for no accent
                     accentID = None
@@ -693,7 +701,6 @@ class SheetMusic:
                             displacementX = 20
 
                         else:
-                            print("buh")
                             accent = self.flat
 
                             displacementY = -3

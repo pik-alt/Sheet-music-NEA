@@ -1,3 +1,0 @@
-280,50,False,sharp,1
-440,65,False,natural,1
-640,95,False,flat,1

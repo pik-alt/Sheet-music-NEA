@@ -1,4 +1,5 @@
-hello = None
+testing = ()
 
-if hello:
-    print("buh")
+super = testing and True
+if super:
+    print("her")

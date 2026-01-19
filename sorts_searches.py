@@ -72,7 +72,10 @@ def linearSearch(self, wantedItem, list):
 
 
 
-def binarySearch(itemToFind, list):
+def binarySearch(itemToFind, list, functionCalled):
+
+    functionCalled
+
     found = False
     
     first = 0
@@ -81,12 +84,12 @@ def binarySearch(itemToFind, list):
     while first <= last and not found:
         midpoint = (first+last) // 2
 
-        if list[midpoint].outputID() == itemToFind:
+        if functionCalled(list[midpoint]) == itemToFind:
             found = True
             return midpoint
         
         else:
-            if list[midpoint].outputID() < itemToFind:
+            if functionCalled(list[midpoint]) < itemToFind:
                 first = midpoint + 1
             
             else:
