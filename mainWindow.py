@@ -247,6 +247,11 @@ class SheetMusic:
                 if item != self.clefID:
                     self.staveCanvas.delete(item)
 
+                    #check if the note has an accent and delete it
+                    index = binarySearch(item, self.notesList)
+                    if self.notesList[index].outputAccent():
+                        self.staveCanvas.delete(self.notesList[index].outputAccent())
+
                     del self.notesList[0]
                 index += 1
             
@@ -319,7 +324,7 @@ class SheetMusic:
             if self.notesList[aboveNoteIndex].outputIsRest(): aboveNote = False
 
             #default displacement for the sharp symbol
-            displacementY = 5
+            displacementY = 25
             displacementX = 20
 
 
@@ -328,11 +333,12 @@ class SheetMusic:
 
                 #sharp and flat have different displacement due to their size and shape
                 if self.currentNote == self.flat:
-                    displacementY = -3
-                    displacementX = 17
+                    displacementY = 20
+                    displacementX = 18
 
-                yPos = self.closestStave(event) + displacementY # position displacement to make the accent appear in the correct place
-                xPos = self.closestX(event) - displacementX   #
+
+                yPos = self.notesList[aboveNoteIndex].outputY_POS() + displacementY # position displacement to make the accent appear in the correct place
+                xPos = self.notesList[aboveNoteIndex].outputX_POS() - displacementX 
 
                 accentID = self.staveCanvas.create_image(xPos, yPos, image=self.currentNote)
 
@@ -388,17 +394,30 @@ class SheetMusic:
             item = overlapping[index]
 
             if item > 8 and item != self.clefID: #8 is the last ID of the stave, any object after 8 is user placed
-                self.staveCanvas.delete(item)    #we also don't want to delete the clefs
-
+                                                 #we also don't want to delete the clefs
+                
                 index = binarySearch(item, self.notesList)
 
-                #if the note has an accent, delete the accent
-                #outputAccent gives the ID which is what we need
-                if self.notesList[index].outputAccent():
-                    self.staveCanvas.delete(self.notesList[index].outputAccent())
 
-                #delete it from the list of notes
-                del self.notesList[index]
+
+                #if user has clicked on an accent by itself
+                if self.notesList[index].outputAccent() == item:
+                    self.notesList[index].setAccent(None)
+                
+                #user clicked on a note
+                else:
+
+                    #delete it from the list of notes
+                    del self.notesList[index]
+
+                    #if the note has an accent, delete the accent
+                    #outputAccent gives the ID which is what we need
+
+                    if self.notesList[index].outputAccent():
+                        self.staveCanvas.delete(self.notesList[index].outputAccent())
+
+
+                self.staveCanvas.delete(item)     
                 stop = True
             index += 1
 
@@ -632,16 +651,21 @@ class SheetMusic:
 
                 activeNote = contents[i].split(",")
 
-                #activeNote[2] is a bool on if the note is a rest or not
-                if activeNote[2] == "True":
+                xPos = activeNote[0]
+                yPos = activeNote[1]
+                isRest = activeNote[2]
+                accent = activeNote[3]
+                duration = activeNote[4]
 
-                    noteID = self.staveCanvas.create_image(int(activeNote[0]),int(activeNote[1]),image=self.rest)
+                if isRest == "True":
+
+                    noteID = self.staveCanvas.create_image(int(xPos),int(yPos),image=self.rest)
                 
                 else:
-                    noteIndex = math.log2(int(activeNote[4])) + 1 #fucked up solution
+                    noteIndex = math.log2(int(duration)) + 1 #fucked up solution
                                                                   #activeNote[4] gives duration of note
 
-                    noteID = self.staveCanvas.create_image(int(activeNote[0]),int(activeNote[1]),image=nonRests[int(noteIndex)])
+                    noteID = self.staveCanvas.create_image(int(xPos),int(yPos),image=nonRests[int(noteIndex)])
 
                     #
                     #
@@ -656,11 +680,35 @@ class SheetMusic:
                     #
                     ##
 
+                    #default case for no accent
+                    accentID = None
+
+                    if accent != "natural":
+
+                        if accent == "sharp":
+                            #default case for accent being sharp
+                            accent = self.sharp
+
+                            displacementY = 3
+                            displacementX = 20
+
+                        else:
+                            print("buh")
+                            accent = self.flat
+
+                            displacementY = -3
+                            displacementX = 17
+
+
+                        accentID = self.staveCanvas.create_image(int(xPos) - displacementX, int(yPos) + displacementY, image=accent)
+
+
+
 
             
-                    #Note(ID, x position, y position, isRest, duration)
+                    #Note(ID, x position, y position, isRest, accent, duration)
                     #use a dictionary to convert the note type to a duration
-                newNote = Note(noteID, int(activeNote[0]), int(activeNote[1]), activeNote[2] == "True", int(activeNote[3]))
+                newNote = Note(noteID, int(xPos), int(yPos), isRest == "True", accentID, duration)
                 self.notesList.append(newNote)                
 
 
@@ -677,11 +725,13 @@ class SheetMusic:
 
             sortedNotes = mergeSort(self.notesList)
             activeNote = sortedNotes[0]
+
+
             for i in range(len(sortedNotes[0])):
 
-                writtenAccent = "none"
-                if activeNote[i].outputAccent != None:
-                    accent = self.staveCanvas.itemcget(activeNote[i].outputAccent, "image")
+                writtenAccent = "natural"
+                if activeNote[i].outputAccent() != None:
+                    accent = self.staveCanvas.itemcget(activeNote[i].outputAccent(), "image")
                     accent = self.pyimageToAccentDict[accent]
 
                     if accent == self.sharp: writtenAccent = "sharp"
@@ -692,7 +742,7 @@ class SheetMusic:
                 file.write(str(activeNote[i].outputX_POS()) + "," +
                            str(activeNote[i].outputY_POS()) + "," +
                            str(activeNote[i].outputIsRest()) + "," +
-                           writtenAccent +
+                           writtenAccent + "," +
                            str(activeNote[i].outputDURATION()) + "\n")
                 
             file.close()

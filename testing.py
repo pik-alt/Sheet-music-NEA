@@ -1,2 +1,4 @@
-import math
-print(math.log2(0.5))
+hello = None
+
+if hello:
+    print("buh")
