@@ -5,7 +5,7 @@ class Note:
         self.Y_POS = Y_POS #int
         self.isRest = isRest #bool
         self.DURATION = DURATION #int
-        self.accent = accent #int
+        self.accent = accent #int, -1 for no accent
 
     def outputID(self):
         return self.ID

@@ -243,8 +243,12 @@ class SheetMusic:
             index = 9
             print(len(objectList))
 
+
+            toDelete = len(objectList) - 9 #9 is the minimum amount of objects present
+
             #while theres still notes to be deleted
-            while len(objectList) != 9:
+            for i in range(toDelete):
+
                 item = objectList[index]
                 if item != self.clefID:
 
@@ -307,7 +311,7 @@ class SheetMusic:
 
 
 
-        #about to place down sharp or clef
+        #about to place down sharp or flat
         if self.currentNote == self.sharp or self.currentNote == self.flat:
 
             overlapping = self.staveCanvas.find_overlapping(event.x, event.y, event.x + 1, event.y + 1)
@@ -318,16 +322,18 @@ class SheetMusic:
 
             #checks that the mouse is above something, that thing is a note and is also not the clef
             #we use overlapping[0] as its the latest item placed down
-            #we don't need to iterate through because the mouse can't be over the clef and a note simulatenously
+            #we don't need to iterate through many times because the mouse can't be over the clef and a note simulatenously
             print(overlapping)
             aboveNote = overlapping and overlapping[0] > 8 and overlapping[0] != self.clefID
 
             if aboveNote:
+
                 #we don't want to be able to accent rests
                 aboveNoteIndex = binarySearch(overlapping[0], self.notesList, Note.outputID)
                 if self.notesList[aboveNoteIndex].outputIsRest(): aboveNote = False
 
-            
+                #we don't want to place an accent on a note that already has one
+                elif self.notesList[aboveNoteIndex].outputAccent() != -1: aboveNote = False
 
 
             #placing the accent
@@ -342,6 +348,9 @@ class SheetMusic:
                     displacementY = 20
                     displacementX = 18
 
+                #displace less if placed onto a full note, as it's smaller
+                if self.notesList[aboveNoteIndex].outputDURATION() == 4:
+                    displacementY = 0
 
                 yPos = self.notesList[aboveNoteIndex].outputY_POS() + displacementY # position displacement to make the accent appear in the correct place
                 xPos = self.notesList[aboveNoteIndex].outputX_POS() - displacementX 
@@ -373,7 +382,7 @@ class SheetMusic:
 
             #Note(ID, x position, y position, isRest, duration, accent) default accent is none
             #use a dictionary to convert the note type to a duration
-            newNote = Note(noteID, xPos, yPos, self.currentNote == self.rest, self.notesDict[self.currentNote], None)
+            newNote = Note(noteID, xPos, yPos, self.currentNote == self.rest, self.notesDict[self.currentNote], -1)
             self.notesList.append(newNote)
 
 
@@ -410,9 +419,11 @@ class SheetMusic:
                 objectType = self.staveCanvas.itemcget(item, "image")
 
                 if objectType == "pyimage8" or objectType == "pyimage9": #pyimage 8 and 9 are the images for flat and rest respectively
-                    accentIndex = binarySearch(item, self.notesList, Note.outputAccent)
 
-                    self.notesList[accentIndex].setAccent(None)
+
+                    #find the note the accent is attached to and set its accent to -1
+                    accentIndex = binarySearch(item, self.notesList, Note.outputAccent)
+                    self.notesList[accentIndex].setAccent(-1)
 
                 
                 #user clicked on a note
@@ -491,7 +502,7 @@ class SheetMusic:
     #Function name: validateBPM
     #input: Text stored in the BPM text box
     #output: returns the tempo only if it's a valid integer
-    def validateBPM(self):
+    def validate(self):
         tempo = self.BPMtextBox.get("1.0",END)
 
         try:
@@ -499,14 +510,18 @@ class SheetMusic:
             print(tempo)
 
             if tempo <= 0 or tempo > 300:
-                messagebox.showwarning(title="Error",
+                messagebox.showerror(title="Error",
                                        message="Please enter a number between 0 and 300")
+                
+            elif len(self.notesList) == 0:
+                messagebox.showerror(title="Error",
+                                    message="Cannot generate file with no notes")
             else: return tempo
 
 
 
         except:
-            messagebox.showinfo(title="Error", 
+            messagebox.showerror(title="Error", 
                                 message="Please enter an integer for the tempo")
         
 
@@ -557,7 +572,7 @@ class SheetMusic:
         #sets up time to be 0 so that the track plays from the beginning 
         #and also to have something to innumerate upon
         time = 0
-        tempo = self.validateBPM()
+        tempo = self.validate()
         if tempo:
 
             #taken from the midiutils example code
@@ -607,7 +622,7 @@ class SheetMusic:
 
 
                     #if the note has an accent we need to change the pitch
-                    if activeNote.outputAccent() != None:
+                    if activeNote.outputAccent() != -1:
 
                         #finds the pyimage name of the accent with "staveCanvas.itemcget()" and puts that through a dictionary to get the actual type
                         accent = self.staveCanvas.itemcget(activeNote.outputAccent(), "image")
@@ -689,7 +704,7 @@ class SheetMusic:
             
 
                     #default case for no accent
-                    accentID = None
+                    accentID = -1
 
                     if accent != "natural":
 
@@ -737,7 +752,7 @@ class SheetMusic:
             for i in range(len(sortedNotes[0])):
 
                 writtenAccent = "natural"
-                if activeNote[i].outputAccent() != None:
+                if activeNote[i].outputAccent() != -1:
                     accent = self.staveCanvas.itemcget(activeNote[i].outputAccent(), "image")
                     accent = self.pyimageToAccentDict[accent]
 
