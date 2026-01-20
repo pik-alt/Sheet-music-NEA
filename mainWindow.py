@@ -3,10 +3,9 @@
 from tkinter import *
 from tkinter import messagebox
 from tkinter import filedialog
-import TAOAT
 from midiutil import *
 from noteclass import Note
-from sorts_searches import mergeSort, linearSearch, binarySearch
+from sorts_searches import mergeSort, binarySearch
 import subprocess, os, platform
 import math
 
@@ -21,9 +20,6 @@ class SheetMusic:
         self.window.resizable (False,False)
         self.window.config(background="darkgray")
 
-        #checks if its 6
-        if TAOAT.is_six(6):
-            print(6)
 
         self.notesList = []
 
@@ -48,12 +44,6 @@ class SheetMusic:
         #List of clefs for the dropdown menu
         self.listClef = ["Treble","Bass"]
 
-        #2D list of a note and its corresponding accent if it has one
-        self.accentArary = []
-
-        #by default, you place down notes instead of sharps or flats
-        self.canPlaceSharp = False
-        self.canPlaceFlat = False
 
         #loads in images of all the notes, clefs and accents
         self.quarter = PhotoImage(file="images/quarter.png")#pyimage1
