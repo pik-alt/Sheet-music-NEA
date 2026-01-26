@@ -32,7 +32,6 @@ class SheetMusic:
 
 
         #Creates the two canvasas to be able to import images onto them
-        #Currently very different colours just so I can see what I'm doing
         optionsCanvas = Canvas(optionsFrame, width = 930, height = 100)
         optionsCanvas.config(bg="lightgray")
         optionsCanvas.pack()
@@ -119,7 +118,6 @@ class SheetMusic:
 
 
         #Creates button for placing the clef
-        #Currently the user has to delete the old clef manually, that should be fixed in the future ideally
         buttonPlaceClef = Button(optionsCanvas, text="Place\nclef", command = self.placeClef)
         buttonPlaceClef.grid(column = 8, row = 0, padx = (15,20), pady = 0)
 
@@ -135,7 +133,7 @@ class SheetMusic:
         self.BPMtextBox.insert("1.0", "120")
 
 
-        #buttonGenerateMusic = Button(optionsCanvas, text="Generate\nMIDI file")
+        
         buttonGenerateMusic = Button(optionsCanvas, text="Generate\nMIDI file",command=self.createMIDI)
         buttonGenerateMusic.grid(column = 10, row = 0, padx = (50,40), pady = 5)
 
@@ -162,12 +160,7 @@ class SheetMusic:
             self.rest    : 1 
         }
 
-        #dictionary to convert accent pointers into strings for the note class
-        self.accentDict = {
-            self.sharp : "sharp",
-            self.flat  : "flat"
-        }
-
+        #dictionary to translate Tkinter file names to their pointers
         self.pyimageToAccentDict = {
             "pyimage8" : self.flat,
             "pyimage9" : self.sharp
@@ -175,7 +168,6 @@ class SheetMusic:
 
 
         #Dictionary to convert from note Y values to their midi note number
-        #because the midi specification includes sharps while my software does not,
         #there is no function to go from one to the other so I have to use a dictionary
         self.trebleYposDict = {
             135: 50, #D
