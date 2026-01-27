@@ -223,7 +223,6 @@ class SheetMusic:
 
             objectList = self.staveCanvas.find_all()
             index = 9
-            print(len(objectList))
 
 
             toDelete = len(objectList) - 9 #9 is the minimum amount of objects present
@@ -258,20 +257,10 @@ class SheetMusic:
 
     #Function name: placeClef
     #input: none, activated by pressing the "place clef" button
-    #purpose: deletes the current clef (if there is one) and places down the new one
+    #purpose: deletes the current clef and places down the new one
     def placeClef(self):
 
-        deleted = False
-        index = 0
-        objectList = self.staveCanvas.find_all() #returns every object within the canvas
-
-        #linear search to sort through the canvas to find the object which matches the clefID and deletes it
-        while not deleted:
-            if objectList[index] == self.clefID:
-                self.staveCanvas.delete(objectList[index])
-                deleted = True
-            else:
-                index += 1
+        self.staveCanvas.delete(self.clefID)
              
         #draws the current clef based on the value in the textbox
         if self.currentClef.get() == "Treble":
@@ -288,12 +277,10 @@ class SheetMusic:
    #purpose: places a note at the x position of the mouse and to the closest stave line in the y direction
     def leftClickEvent(self,event):
 
-
-        
-
-
-
+        #
         #about to place down sharp or flat
+        #
+
         if self.currentNote == self.sharp or self.currentNote == self.flat:
 
             overlapping = self.staveCanvas.find_overlapping(event.x, event.y, event.x + 1, event.y + 1)
@@ -305,7 +292,6 @@ class SheetMusic:
             #checks that the mouse is above something, that thing is a note and is also not the clef
             #we use overlapping[0] as its the latest item placed down
             #we don't need to iterate through many times because the mouse can't be over the clef and a note simulatenously
-            print(overlapping)
             aboveNote = overlapping and overlapping[0] > 8 and overlapping[0] != self.clefID
 
             if aboveNote:
