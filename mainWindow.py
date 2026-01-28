@@ -307,12 +307,12 @@ class SheetMusic:
             #placing the accent
             if aboveNote:
 
-                #default displacement for the sharp symbol
-                displacementY = 25
-                displacementX = 20
+                if self.currentNote == self.sharp:
+                    displacementY = 25
+                    displacementX = 20
 
                 #sharp and flat have different displacement due to their size and shape
-                if self.currentNote == self.flat:
+                else:
                     displacementY = 20
                     displacementX = 18
 
@@ -402,7 +402,7 @@ class SheetMusic:
                     #if the note has an accent, delete the accent
                     #outputAccent gives the ID which is what we need
 
-                    if self.notesList[index].outputAccent():
+                    if self.notesList[index].outputAccent() != -1:
                         self.staveCanvas.delete(self.notesList[index].outputAccent())
 
                     #delete it from the list of notes
@@ -440,7 +440,7 @@ class SheetMusic:
         #Finds whether the mouse is closest to the top stave line, in between the stave lines or the bottom stave line and returns the closest one
         if mouseY - topMiddle <= 10:
             return topMiddle
-        elif mouseY - topMiddle > 10 and mouseY - topMiddle < 20:
+        elif mouseY - topMiddle < 20:
             return topMiddle + 15
         else:
             return topMiddle + 30
