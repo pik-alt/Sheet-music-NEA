@@ -72,6 +72,8 @@ def linearSearch(self, wantedItem, list):
 
 
 
+
+#taken from "Essential Algorithms for A level Computer Science"
 def binarySearch(itemToFind, list, functionCalled):
 
     functionCalled

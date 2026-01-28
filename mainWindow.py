@@ -356,65 +356,54 @@ class SheetMusic:
 
 
 
-
-
-
-
-    #Function name: rightClickEvent
+    #Procedure name: rightClickEvent
     #input: current mouse position
-    #purpose: deletes whatever object the mouse is currently overlapping with
+    #purpose: deletes an note if a note is selected, or an accent if an accent is selected
     def rightClickEvent(self,event):
-        overlapping = self.staveCanvas.find_overlapping(event.x, event.y, event.x + 1, event.y + 1)
-        stop = False
-        index = 0
+        overlapping = self.staveCanvas.find_overlapping(event.x,event.y, event.x + 1, event.y + 1)
 
-        #we reverse the list so that it deletes the newest of multiple notes if they overlap
+        #reverse the list so it priorities the more recently placed notes
         overlapping = overlapping[::-1]
+        index = 0
+        isNote = False
 
-        #we check if the mouse is overlapping with something and then delete the first user placed note
-        while not stop and overlapping and index < len(overlapping):
+        #find first overlapping note
+        while not isNote and overlapping and index < len(overlapping):
             item = overlapping[index]
 
-            #found valid note or accent
-            if item > 8 and item != self.clefID: #8 is the last ID of the stave, any object after 8 is user placed
-                                                 #we also don't want to delete the clefs
-                
-                
+            #tries to find the itemID within the list of notes
+            noteIndex = binarySearch(item, self.notesList, Note.outputID)
+
+            if noteIndex != None:
+                isNote = True
+            
+            else:
+                index += 1
+        
+
+        #mouse was overlapping a note
+        if isNote:
+
+            accentID = self.notesList[noteIndex].outputAccent()
+            hasAccent = (self.notesList[noteIndex].outputAccent() != -1)
+            accentSelected = (self.currentNote == self.sharp or self.currentNote == self.flat)
+
+            #only delete accent if accent is selected and clicked note has accent
+            if accentSelected:
+
+                if hasAccent:
+                    self.staveCanvas.delete(accentID)
+                    self.notesList[noteIndex].setAccent(-1)
 
 
+            #user has a note selected
+            else:
 
-                #if user has clicked on an accent by itself
-                objectType = self.staveCanvas.itemcget(item, "image")
+                if hasAccent:
+                    self.staveCanvas.delete(accentID)
 
-                if objectType == "pyimage8" or objectType == "pyimage9": #pyimage 8 and 9 are the images for flat and rest respectively
-
-
-                    #find the note the accent is attached to and set its accent to -1
-                    accentIndex = binarySearch(item, self.notesList, Note.outputAccent)
-                    self.notesList[accentIndex].setAccent(-1)
-
-                
-                #user clicked on a note
-                else:
-
-                    index = binarySearch(item, self.notesList, Note.outputID)
-
-                    #if the note has an accent, delete the accent
-                    #outputAccent gives the ID which is what we need
-
-                    if self.notesList[index].outputAccent() != -1:
-                        self.staveCanvas.delete(self.notesList[index].outputAccent())
-
-                    #delete it from the list of notes
-                    del self.notesList[index]
-
-                    
-
-
-                self.staveCanvas.delete(item)     
-                stop = True
-            index += 1
-
+                del self.notesList[noteIndex]
+                self.staveCanvas.delete(item)
 
 
 
