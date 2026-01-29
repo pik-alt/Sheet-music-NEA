@@ -15,7 +15,7 @@ class SheetMusic:
     def __init__(self):
     
         self.window = Tk()
-        self.window.title("Test")
+        self.window.title("Sheet Music Creator")
         self.window.geometry("1000x500")
         self.window.resizable (False,False)
         self.window.config(background="darkgray")
