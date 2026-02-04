@@ -1,7 +1,7 @@
 from noteclass import Note
 
 
-#taken from the essential algorithms for A level cs
+#taken from "Essential Algorithms for A level Computer Science"
 def merge(list1, list2):
 
     newlist = []
@@ -59,16 +59,6 @@ def mergeSort(USlist):
     return newlist
 
 
-
-def linearSearch(self, wantedItem, list):
-    found = False
-    index = 0
-    #Item will always be in the array, we don't need a condition if index > len(list)
-    while found != True:
-        if list[index].outputID() == wantedItem:
-            found = True
-            return index
-        else: index += 1
 
 
 
