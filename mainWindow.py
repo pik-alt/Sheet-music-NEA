@@ -510,6 +510,7 @@ class SheetMusic:
             
             tempNotesList = []
 
+            #add every note sharing an x position to a new list and delete it from the old list
             for j in range(0, tempIndex):
                 tempNotesList.append(notesList[0][0])
                 del notesList[0][0]
@@ -663,7 +664,7 @@ class SheetMusic:
                         noteID = self.staveCanvas.create_image(int(xPos),int(yPos),image=self.rest)
                     
                     else:
-                        noteIndex = math.log2(int(duration)) + 1 #messed up solution
+                        noteIndex = math.log2(int(duration)) + 1 #note durations go up in powers of 2, meaning we can use log2 + 1 to get index
 
 
                         noteID = self.staveCanvas.create_image(int(xPos),int(yPos),image=nonRests[int(noteIndex)])
@@ -696,7 +697,6 @@ class SheetMusic:
 
                 
                         #Note(ID, x position, y position, isRest, accent, duration)
-                        #use a dictionary to convert the note type to a duration
                     newNote = Note(noteID, int(xPos), int(yPos), isRest == "True", accentID, duration)
                     self.notesList.append(newNote)                
 
